@@ -1,6 +1,9 @@
-import { frontendServer } from "./create-frontend-server/index";
+import 'dotenv/config';
+import { DEFAULT_FRONTEND_PORT } from './common/constants';
+import { frontendServer } from './frontend-server/index';
 
-const HTTP_PORT = 8181;
+const frontendPort = Number(process.env.FRONTEND_PORT) || DEFAULT_FRONTEND_PORT;
 
-console.log(`Frontend server with game UI accessible via http://localhost:${HTTP_PORT}`);
-frontendServer.listen(HTTP_PORT);
+frontendServer.listen(frontendPort, () => {
+  console.log(`Frontend server with game UI accessible via http://localhost:${frontendPort}`);
+});
