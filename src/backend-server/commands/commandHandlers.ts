@@ -1,9 +1,21 @@
 import { MessageType } from '../../common/enums';
 import { WebSocketWithId } from '../../common/types';
-import { validateAddUserToRoomData, validateRegistrationData, validateShipsData } from '../../utils/validators';
+import {
+  validateAddUserToRoomData,
+  validateAttackData,
+  validateRegistrationData,
+  validateShipsData,
+} from '../../utils/validators';
 import { checkAllPlayersHaveShips } from '../database/gameDb';
 import { isUserInRoom, removeRoomById } from '../database/roomDb';
-import { createGame, initPlayerShips, startGame } from '../operations/gameOperations';
+import {
+  alternateTurn,
+  attack,
+  checkPlayerTurn,
+  createGame,
+  initPlayerShips,
+  startGame,
+} from '../operations/gameOperations';
 import { registerUser } from '../operations/regOperations';
 import { addUserToRoom, createRoomAndAddUser, updateRooms } from '../operations/roomOperations';
 import { updateWinners } from '../operations/winnerOperations';
@@ -44,9 +56,19 @@ export const handleAddShips = (clientWebSocket: WebSocketWithId, parsedData: unk
   startGame(clientWebSocket.id);
 };
 
+export const handleAttack = (clientWebSocket: WebSocketWithId, parsedData: unknown) => {
+  const attackData = validateAttackData(parsedData);
+
+  checkPlayerTurn(clientWebSocket.id);
+  attack(attackData, clientWebSocket.id);
+  alternateTurn(clientWebSocket.id);
+  checkGameEnd(attackData);
+};
+
 export const commands = new Map([
   [MessageType.REG, handleRegistration],
   [MessageType.CREATE_ROOM, handleCreateRoom],
   [MessageType.ADD_USER, handleAddUserToRoom],
   [MessageType.ADD_SHIPS, handleAddShips],
+  [MessageType.ATTACK, handleAttack],
 ]);

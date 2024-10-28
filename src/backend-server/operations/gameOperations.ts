@@ -1,8 +1,18 @@
 import { randomUUID } from 'node:crypto';
 import { getRoomByUserSocketId } from '../database/roomDb';
 import { MessageType } from '../../common/enums';
-import { Game, Player, ShipsData } from '../../common/types';
-import { addGame, getEnemyPlayer, getGameByPlayerId, getPlayerById } from '../database/gameDb';
+import { AttackData, Game, Player, ShipsData } from '../../common/types';
+import {
+  addGame,
+  findShotShip,
+  getAttackStatus,
+  getEnemyPlayer,
+  getEnemyShips,
+  getGameByPlayerId,
+  getPlayerById,
+  getResponsesWithMissAroundShip,
+  getResponsesWithKillShipCoors,
+} from '../database/gameDb';
 import { deleteField, sendResponseToPlayers } from '../../utils/utils';
 import { getUserBySocketId } from '../database/userDb';
 
@@ -24,12 +34,7 @@ export const createGame = (userSocketId: number) => {
     usedCoords: new Set<string>(),
   }));
   const gameId = randomUUID();
-  const newGame: Game = {
-    gameId,
-    players,
-    playerWithTurnId: roomUsers[0].webSocketId,
-    lastStatus: null,
-  };
+  const newGame: Game = { gameId, players, playerWithTurnId: roomUsers[0].webSocketId, lastStatus: null };
 
   addGame(newGame);
 
@@ -91,4 +96,40 @@ export const alternateTurn = (userSocketId: number) => {
     { currentPlayer: playerWithTurnIndex },
     { currentPlayer: playerWithTurnIndex },
   );
+};
+
+export const checkPlayerTurn = (userSocketId: number) => {
+  const foundGame = getGameByPlayerId(userSocketId);
+
+  if (foundGame?.playerWithTurnId !== userSocketId) {
+    throw new Error(`Client ${userSocketId} tried to attack on wrong turn`);
+  }
+};
+
+export const attack = (data: AttackData, userSocketId: number) => {
+  const { x = Math.floor(Math.random() * 10), y = Math.floor(Math.random() * 10), indexPlayer } = data;
+  const attackStatus = getAttackStatus(x, y, userSocketId);
+  const game = getGameByPlayerId(userSocketId);
+  const enemyShips = getEnemyShips(userSocketId);
+
+  if (!enemyShips || !game) {
+    throw new Error('Game or enemy ships not found');
+  }
+
+  const shotShip = findShotShip(x, y, enemyShips);
+
+  if (shotShip && attackStatus === 'killed') {
+    getResponsesWithKillShipCoors(shotShip, userSocketId).forEach((responseData) => {
+      sendResponseToPlayers(MessageType.ATTACK, game.gameId, responseData, responseData);
+    });
+    getResponsesWithMissAroundShip(shotShip, userSocketId).forEach((responseData) => {
+      sendResponseToPlayers(MessageType.ATTACK, game.gameId, responseData, responseData);
+    });
+  }
+
+  game.lastStatus = attackStatus;
+
+  const responseData = { position: { x, y }, currentPlayer: indexPlayer, status: attackStatus };
+
+  sendResponseToPlayers(MessageType.ATTACK, game.gameId, responseData, responseData);
 };

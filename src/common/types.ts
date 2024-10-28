@@ -20,6 +20,18 @@ export interface AddUserToRoomData {
   indexRoom: string;
 }
 
+export interface ShipsData {
+  ships: Omit<Ship, 'undamagedParts'>[];
+  gameId: string;
+}
+
+export interface AttackData {
+  x: number;
+  y: number;
+  gameId: string;
+  indexPlayer: number;
+}
+
 export interface User {
   index: number;
   name: string;
@@ -60,9 +72,4 @@ export interface Game {
   players: Player[];
   playerWithTurnId: number;
   lastStatus: 'miss' | 'killed' | 'shot' | null;
-}
-
-export interface ShipsData {
-  ships: Omit<Ship, 'undamagedParts'>[];
-  gameId: string;
 }

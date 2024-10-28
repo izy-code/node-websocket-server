@@ -1,34 +1,24 @@
-import { AddUserToRoomData, RegistrationData, ShipsData, SocketMessage } from '../common/types';
-import { isAddUserToRoomData, isRegData, isShipsData, isSocketMessage } from './type-guards';
+import { AddUserToRoomData, AttackData, RegistrationData, ShipsData, SocketMessage } from '../common/types';
+import { isAddUserToRoomData, isAttackData, isRegData, isShipsData, isSocketMessage } from './type-guards';
 
-export const validateSocketMessage = (parsedMessage: unknown): SocketMessage => {
-  if (!isSocketMessage(parsedMessage)) {
-    throw new Error(`Invalid socket message: ${parsedMessage}`);
-  }
-
-  return parsedMessage;
-};
-
-export const validateRegistrationData = (data: unknown): RegistrationData => {
-  if (!isRegData(data)) {
-    throw new Error(`Invalid registration data: ${data}`);
+const validateData = <T>(data: unknown, typeGuard: (data: unknown) => data is T, errorMessage: string): T => {
+  if (!typeGuard(data)) {
+    throw new Error(`${errorMessage}: ${data ? JSON.stringify(data) : ''}`);
   }
 
   return data;
 };
 
-export const validateAddUserToRoomData = (data: unknown): AddUserToRoomData => {
-  if (!isAddUserToRoomData(data)) {
-    throw new Error(`Invalid add user to room data: ${data}`);
-  }
+export const validateSocketMessage = (parsedMessage: unknown): SocketMessage =>
+  validateData(parsedMessage, isSocketMessage, 'Invalid socket message');
 
-  return data;
-};
+export const validateRegistrationData = (data: unknown): RegistrationData =>
+  validateData(data, isRegData, 'Invalid registration data');
 
-export const validateShipsData = (data: unknown): ShipsData => {
-  if (!isShipsData(data)) {
-    throw new Error(`Invalid ships data: ${data}`);
-  }
+export const validateAddUserToRoomData = (data: unknown): AddUserToRoomData =>
+  validateData(data, isAddUserToRoomData, 'Invalid add user to room data');
 
-  return data;
-};
+export const validateShipsData = (data: unknown): ShipsData => validateData(data, isShipsData, 'Invalid ships data');
+
+export const validateAttackData = (data: unknown): AttackData =>
+  validateData(data, isAttackData, 'Invalid attack data');
