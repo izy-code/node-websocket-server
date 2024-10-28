@@ -130,3 +130,23 @@ export const getResponsesWithMissAroundShip = (ship: Ship, userSocketId: number)
 
   return responsesData;
 };
+
+export const getWinnerIfExists = (gameId: string, userSocketId: number) => {
+  const game = getGameById(gameId);
+
+  if (!game) {
+    throw new Error('Game not found');
+  }
+
+  const playerWithoutShips = game.players.find((player) => player.ships.every((ship) => ship.undamagedParts === 0));
+
+  return playerWithoutShips ? getPlayerById(userSocketId, gameId) : null;
+};
+
+export const removeGameById = (gameId: string) => {
+  const removedGameIndex = games.findIndex((game) => game.gameId === gameId);
+
+  if (removedGameIndex !== -1) {
+    games.splice(removedGameIndex, 1);
+  }
+};

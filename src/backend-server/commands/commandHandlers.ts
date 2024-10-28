@@ -11,6 +11,7 @@ import { isUserInRoom, removeRoomById } from '../database/roomDb';
 import {
   alternateTurn,
   attack,
+  checkGameEnd,
   checkPlayerTurn,
   createGame,
   initPlayerShips,
@@ -61,8 +62,10 @@ export const handleAttack = (clientWebSocket: WebSocketWithId, parsedData: unkno
 
   checkPlayerTurn(clientWebSocket.id);
   attack(attackData, clientWebSocket.id);
-  alternateTurn(clientWebSocket.id);
-  checkGameEnd(attackData);
+
+  const isGameEnded = checkGameEnd(attackData, clientWebSocket.id);
+
+  if (!isGameEnded) alternateTurn(clientWebSocket.id);
 };
 
 export const commands = new Map([

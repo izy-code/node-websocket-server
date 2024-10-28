@@ -12,9 +12,12 @@ import {
   getPlayerById,
   getResponsesWithMissAroundShip,
   getResponsesWithKillShipCoors,
+  getWinnerIfExists,
+  removeGameById,
 } from '../database/gameDb';
 import { deleteField, sendResponseToPlayers } from '../../utils/utils';
 import { getUserBySocketId } from '../database/userDb';
+import { addWinner } from './winnerOperations';
 
 export const createGame = (userSocketId: number) => {
   const userRoom = getRoomByUserSocketId(userSocketId);
@@ -132,4 +135,23 @@ export const attack = (data: AttackData, userSocketId: number) => {
   const responseData = { position: { x, y }, currentPlayer: indexPlayer, status: attackStatus };
 
   sendResponseToPlayers(MessageType.ATTACK, game.gameId, responseData, responseData);
+};
+
+export const checkGameEnd = (data: AttackData, userSocketId: number) => {
+  const { gameId } = data;
+
+  const winner = getWinnerIfExists(gameId, userSocketId);
+
+  if (!winner) {
+    return false;
+  }
+
+  const winnerIndex = getUserBySocketId(winner.userSocketId)?.index;
+  const responseData = { winPlayer: winnerIndex };
+
+  sendResponseToPlayers(MessageType.FINISH, gameId, responseData, responseData);
+  addWinner(userSocketId);
+  removeGameById(gameId);
+
+  return true;
 };
