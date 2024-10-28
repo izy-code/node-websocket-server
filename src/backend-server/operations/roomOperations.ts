@@ -9,7 +9,7 @@ import {
 } from '../database/roomDb';
 import { getUserBySocketId } from '../database/userDb';
 import { randomUUID } from 'node:crypto';
-import { AddUserToRoomData } from 'src/common/types';
+import { AddUserToRoomData } from '../../common/types';
 
 export const updateRooms = () => {
   const oneUserRooms = getRoomsWithOneUser();

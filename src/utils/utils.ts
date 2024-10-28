@@ -1,3 +1,4 @@
+import { getGameByPlayerId } from '../backend-server/database/gameDb';
 import { backendServer } from '../backend-server';
 import { MessageType } from '../common/enums';
 import { WebSocketWithId } from '../common/types';
@@ -22,4 +23,26 @@ export const sendResponseToAll = (type: MessageType, data: object, prefix?: stri
   }
 
   console.log(`Sent ${prefix ? prefix + ' ' : ''}to all clients: `, response);
+};
+
+export const sendResponseToPlayers = (type: MessageType, gameId: string, player1Data: object, player2Data: object) => {
+  const response1 = { type, data: JSON.stringify(player1Data), id: 0 };
+  const response2 = { type, data: JSON.stringify(player2Data), id: 0 };
+
+  for (const webSocket of backendServer.clients) {
+    if (webSocket.readyState === WebSocket.OPEN) {
+      const wsWithId = webSocket as WebSocketWithId;
+      const foundGame = getGameByPlayerId(wsWithId.id);
+
+      if (foundGame?.gameId === gameId) {
+        if (wsWithId.id === foundGame.players[0].userSocketId) {
+          wsWithId.send(JSON.stringify(response1));
+          console.log(`Sent to player 1 (client ${wsWithId.id}) in game ${gameId}: `, response1);
+        } else if (wsWithId.id === foundGame.players[1].userSocketId) {
+          wsWithId.send(JSON.stringify(response2));
+          console.log(`Sent to player 2 (client ${wsWithId.id}) in game ${gameId}: `, response2);
+        }
+      }
+    }
+  }
 };

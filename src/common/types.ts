@@ -37,3 +37,26 @@ export interface Winner {
   name: string;
   wins: number;
 }
+
+export interface Ship {
+  position: {
+    x: number;
+    y: number;
+  };
+  direction: boolean;
+  length: number;
+  type: 'small' | 'medium' | 'large' | 'huge';
+}
+
+export interface Player {
+  userSocketId: number;
+  ships: Ship[];
+  usedCoords: Set<string>;
+}
+
+export interface Game {
+  gameId: string;
+  players: Player[];
+  playerWithTurnId: number;
+  lastStatus: 'miss' | 'killed' | 'shot' | null;
+}
