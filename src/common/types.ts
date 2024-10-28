@@ -16,6 +16,10 @@ export interface RegistrationData {
   password: string;
 }
 
+export interface AddUserToRoomData {
+  indexRoom: string;
+}
+
 export interface User {
   index: number;
   name: string;

@@ -1,13 +1,24 @@
 import { sendResponseToAll } from '../../utils/utils';
 import { MessageType } from '../../common/enums';
-import { createRoom, getRoomByUserSocketId, getRooms } from '../database/roomDb';
+import {
+  createRoom,
+  getRoomByUserSocketId,
+  pushUserToRoom,
+  pruneUserFromAnotherRooms,
+  getRoomsWithOneUser,
+} from '../database/roomDb';
 import { getUserBySocketId } from '../database/userDb';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
+import { AddUserToRoomData } from 'src/common/types';
 
 export const updateRooms = () => {
-  const rooms = getRooms();
+  const oneUserRooms = getRoomsWithOneUser();
+  const extractedRoomsData = oneUserRooms.map((room) => ({
+    roomId: room.roomId,
+    roomUsers: room.roomUsers.map((user) => ({ name: user.name, index: user.index })),
+  }));
 
-  sendResponseToAll(MessageType.UPDATE_ROOM, rooms, 'rooms');
+  sendResponseToAll(MessageType.UPDATE_ROOM, extractedRoomsData, 'rooms with one user');
 };
 
 export const createRoomAndAddUser = (socketId: number) => {
@@ -24,5 +35,18 @@ export const createRoomAndAddUser = (socketId: number) => {
   }
 
   createRoom({ roomId: randomUUID(), roomUsers: [loggedInUser] });
-  sendResponseToAll(MessageType.UPDATE_ROOM, getRooms(), 'rooms');
+  updateRooms();
+};
+
+export const addUserToRoom = (socketId: number, data: AddUserToRoomData) => {
+  const { indexRoom } = data;
+  const user = getUserBySocketId(socketId);
+
+  if (!user) {
+    throw new Error("User can't be found in the database");
+  }
+
+  pushUserToRoom(indexRoom, user);
+  pruneUserFromAnotherRooms(socketId, indexRoom);
+  updateRooms();
 };

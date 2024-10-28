@@ -1,5 +1,5 @@
 import { MessageType } from '../common/enums';
-import { RegistrationData, SocketMessage } from '../common/types';
+import { AddUserToRoomData, RegistrationData, SocketMessage } from '../common/types';
 
 const isMessageType = (stringWithType: string): stringWithType is MessageType => {
   return (Object.values(MessageType) as string[]).includes(stringWithType);
@@ -17,3 +17,6 @@ export const isSocketMessage = (message: unknown): message is SocketMessage => {
 
 export const isRegData = (data: unknown): data is RegistrationData =>
   data !== null && typeof data === 'object' && 'name' in data && 'password' in data;
+
+export const isAddUserToRoomData = (data: unknown): data is AddUserToRoomData =>
+  data !== null && typeof data === 'object' && 'indexRoom' in data;

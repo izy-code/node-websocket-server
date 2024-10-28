@@ -21,5 +21,5 @@ export const sendResponseToAll = (type: MessageType, data: object, prefix?: stri
     }
   }
 
-  console.log(`Sent ${prefix ? prefix + ' ' : ''}to all clients: `, data);
+  console.log(`Sent ${prefix ? prefix + ' ' : ''}to all clients: `, response);
 };
