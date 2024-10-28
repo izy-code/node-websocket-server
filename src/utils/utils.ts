@@ -46,3 +46,11 @@ export const sendResponseToPlayers = (type: MessageType, gameId: string, player1
     }
   }
 };
+
+export const deleteField = <T extends object, K extends keyof T>(obj: T, field: K): Omit<T, K> => {
+  const objCopy = { ...obj };
+
+  delete objCopy[field];
+
+  return objCopy;
+};

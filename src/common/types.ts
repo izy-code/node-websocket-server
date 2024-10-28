@@ -46,6 +46,7 @@ export interface Ship {
   direction: boolean;
   length: number;
   type: 'small' | 'medium' | 'large' | 'huge';
+  undamagedParts: number;
 }
 
 export interface Player {
@@ -59,4 +60,9 @@ export interface Game {
   players: Player[];
   playerWithTurnId: number;
   lastStatus: 'miss' | 'killed' | 'shot' | null;
+}
+
+export interface ShipsData {
+  ships: Omit<Ship, 'undamagedParts'>[];
+  gameId: string;
 }
