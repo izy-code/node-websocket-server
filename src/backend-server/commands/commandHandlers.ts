@@ -2,15 +2,26 @@ import { MessageType } from '../../common/enums';
 import { WebSocketWithId } from '../../common/types';
 import { validateRegistrationData } from '../../utils/validators';
 import { registerUser } from '../operations/regOperations';
-import { updateRooms } from '../operations/roomOperations';
+import { createRoomAndAddUser, updateRooms } from '../operations/roomOperations';
 import { updateWinners } from '../operations/winnerOperations';
 
 export const handleRegistration = (clientWebSocket: WebSocketWithId, parsedData: unknown) => {
   const regData = validateRegistrationData(parsedData);
+  const isRegSuccess = registerUser(clientWebSocket, regData);
 
-  registerUser(clientWebSocket, regData);
-  updateRooms();
-  updateWinners();
+  console.log(`Registration success: ${isRegSuccess}`);
+
+  if (isRegSuccess) {
+    updateRooms();
+    updateWinners();
+  }
 };
 
-export const commands = new Map([[MessageType.REG, handleRegistration]]);
+export const handleCreateRoom = (clientWebSocket: WebSocketWithId) => {
+  createRoomAndAddUser(clientWebSocket.id);
+};
+
+export const commands = new Map([
+  [MessageType.REG, handleRegistration],
+  [MessageType.CREATE_ROOM, handleCreateRoom],
+]);

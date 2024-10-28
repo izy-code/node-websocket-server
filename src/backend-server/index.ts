@@ -46,7 +46,7 @@ export const handleMessageFromClient = (clientWebSocket: WebSocketWithId, messag
     throw new Error(`Unknown command: ${socketMessage.type}`);
   }
 
-  const parsedData: unknown = JSON.parse(socketMessage.data);
+  const parsedData: unknown = socketMessage.data ? JSON.parse(socketMessage.data) : '';
 
   commandHandler(clientWebSocket, parsedData);
 };
