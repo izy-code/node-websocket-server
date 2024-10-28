@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { getRoomByUserSocketId } from '../database/roomDb';
 import { MessageType } from '../../common/enums';
-import { AttackData, Game, Player, ShipsData } from '../../common/types';
+import { AttackData, Game, Player, RandomAttackData, ShipsData } from '../../common/types';
 import {
   addGame,
   findShotShip,
@@ -109,8 +109,8 @@ export const checkPlayerTurn = (userSocketId: number) => {
   }
 };
 
-export const attack = (data: AttackData, userSocketId: number) => {
-  const { x = Math.floor(Math.random() * 10), y = Math.floor(Math.random() * 10), indexPlayer } = data;
+export const attack = (data: AttackData | RandomAttackData, userSocketId: number) => {
+  const { x = Math.floor(Math.random() * 10), y = Math.floor(Math.random() * 10), indexPlayer } = data as AttackData;
   const attackStatus = getAttackStatus(x, y, userSocketId);
   const game = getGameByPlayerId(userSocketId);
   const enemyShips = getEnemyShips(userSocketId);
@@ -137,7 +137,7 @@ export const attack = (data: AttackData, userSocketId: number) => {
   sendResponseToPlayers(MessageType.ATTACK, game.gameId, responseData, responseData);
 };
 
-export const checkGameEnd = (data: AttackData, userSocketId: number) => {
+export const checkGameEnd = (data: AttackData | RandomAttackData, userSocketId: number) => {
   const { gameId } = data;
 
   const winner = getWinnerIfExists(gameId, userSocketId);

@@ -1,5 +1,19 @@
-import { AddUserToRoomData, AttackData, RegistrationData, ShipsData, SocketMessage } from '../common/types';
-import { isAddUserToRoomData, isAttackData, isRegData, isShipsData, isSocketMessage } from './type-guards';
+import {
+  AddUserToRoomData,
+  AttackData,
+  RandomAttackData,
+  RegistrationData,
+  ShipsData,
+  SocketMessage,
+} from '../common/types';
+import {
+  isAddUserToRoomData,
+  isAttackData,
+  isRandomAttackData,
+  isRegData,
+  isShipsData,
+  isSocketMessage,
+} from './type-guards';
 
 const validateData = <T>(data: unknown, typeGuard: (data: unknown) => data is T, errorMessage: string): T => {
   if (!typeGuard(data)) {
@@ -22,3 +36,6 @@ export const validateShipsData = (data: unknown): ShipsData => validateData(data
 
 export const validateAttackData = (data: unknown): AttackData =>
   validateData(data, isAttackData, 'Invalid attack data');
+
+export const validateRandomAttackData = (data: unknown): RandomAttackData =>
+  validateData(data, isRandomAttackData, 'Invalid random attack data');

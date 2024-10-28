@@ -3,6 +3,7 @@ import { WebSocketWithId } from '../../common/types';
 import {
   validateAddUserToRoomData,
   validateAttackData,
+  validateRandomAttackData,
   validateRegistrationData,
   validateShipsData,
 } from '../../utils/validators';
@@ -68,10 +69,22 @@ export const handleAttack = (clientWebSocket: WebSocketWithId, parsedData: unkno
   if (!isGameEnded) alternateTurn(clientWebSocket.id);
 };
 
+export const handleAttackRandom = (clientWebSocket: WebSocketWithId, parsedData: unknown) => {
+  const randomAttackData = validateRandomAttackData(parsedData);
+
+  checkPlayerTurn(clientWebSocket.id);
+  attack(randomAttackData, clientWebSocket.id);
+
+  const isGameEnded = checkGameEnd(randomAttackData, clientWebSocket.id);
+
+  if (!isGameEnded) alternateTurn(clientWebSocket.id);
+};
+
 export const commands = new Map([
   [MessageType.REG, handleRegistration],
   [MessageType.CREATE_ROOM, handleCreateRoom],
   [MessageType.ADD_USER, handleAddUserToRoom],
   [MessageType.ADD_SHIPS, handleAddShips],
   [MessageType.ATTACK, handleAttack],
+  [MessageType.ATTACK_RANDOM, handleAttackRandom],
 ]);

@@ -32,6 +32,11 @@ export interface AttackData {
   indexPlayer: number;
 }
 
+export interface RandomAttackData {
+  gameId: string;
+  indexPlayer: number;
+}
+
 export interface User {
   index: number;
   name: string;
