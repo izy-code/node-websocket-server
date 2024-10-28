@@ -54,3 +54,27 @@ export const deleteField = <T extends object, K extends keyof T>(obj: T, field: 
 
   return objCopy;
 };
+
+export const getRandomCoordinates = (usedCoords: Set<string>): { x: number; y: number } | null => {
+  const allCoordinates = new Set<string>();
+
+  for (let x = 0; x < 10; x++) {
+    for (let y = 0; y < 10; y++) {
+      allCoordinates.add(`${x},${y}`);
+    }
+  }
+
+  for (const coord of usedCoords) {
+    allCoordinates.delete(coord);
+  }
+
+  if (allCoordinates.size > 0) {
+    const remainingCoords = Array.from(allCoordinates);
+    const randomCoord = remainingCoords[Math.floor(Math.random() * remainingCoords.length)];
+    const [x, y] = randomCoord.split(',').map(Number);
+
+    return { x, y };
+  }
+
+  return null;
+};

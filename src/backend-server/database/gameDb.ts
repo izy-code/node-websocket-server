@@ -74,9 +74,10 @@ export const getAttackStatus = (x: number, y: number, userSocketId: number) => {
 
   const shotShip = findShotShip(x, y, enemyShips);
 
+  player.usedCoords.add(coorsString);
+
   if (shotShip) {
     shotShip.undamagedParts = shotShip.undamagedParts - 1;
-    player.usedCoords.add(coorsString);
 
     return shotShip.undamagedParts ? 'shot' : 'killed';
   }
@@ -104,6 +105,13 @@ export const getResponsesWithKillShipCoors = (ship: Ship, userSocketId: number) 
 };
 
 export const getResponsesWithMissAroundShip = (ship: Ship, userSocketId: number) => {
+  const game = getGameByPlayerId(userSocketId);
+
+  if (!game) {
+    throw new Error('Game not found');
+  }
+
+  const player = getPlayerById(userSocketId, game.gameId);
   const responsesData = [];
   const userIndex = getUserBySocketId(userSocketId)?.index;
   const { x, y } = ship.position;
@@ -120,6 +128,9 @@ export const getResponsesWithMissAroundShip = (ship: Ship, userSocketId: number)
         continue;
       }
 
+      const coorsString = `${i},${j}`;
+
+      player?.usedCoords.add(coorsString);
       responsesData.push({
         position: { x: i, y: j },
         currentPlayer: userIndex,

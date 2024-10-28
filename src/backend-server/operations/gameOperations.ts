@@ -15,7 +15,7 @@ import {
   getWinnerIfExists,
   removeGameById,
 } from '../database/gameDb';
-import { deleteField, sendResponseToPlayers } from '../../utils/utils';
+import { deleteField, getRandomCoordinates, sendResponseToPlayers } from '../../utils/utils';
 import { getUserBySocketId } from '../database/userDb';
 import { addWinner } from './winnerOperations';
 
@@ -110,15 +110,29 @@ export const checkPlayerTurn = (userSocketId: number) => {
 };
 
 export const attack = (data: AttackData | RandomAttackData, userSocketId: number) => {
-  const { x = Math.floor(Math.random() * 10), y = Math.floor(Math.random() * 10), indexPlayer } = data as AttackData;
-  const attackStatus = getAttackStatus(x, y, userSocketId);
+  const indexPlayer = data.indexPlayer;
   const game = getGameByPlayerId(userSocketId);
   const enemyShips = getEnemyShips(userSocketId);
+  let { x, y } = data as AttackData;
 
   if (!enemyShips || !game) {
     throw new Error('Game or enemy ships not found');
   }
 
+  const player = getPlayerById(userSocketId, game.gameId);
+
+  if (x === undefined && y === undefined && player) {
+    const randomCoords = getRandomCoordinates(player.usedCoords);
+
+    if (!randomCoords) {
+      return;
+    }
+
+    x = randomCoords.x;
+    y = randomCoords.y;
+  }
+
+  const attackStatus = getAttackStatus(x, y, userSocketId);
   const shotShip = findShotShip(x, y, enemyShips);
 
   if (shotShip && attackStatus === 'killed') {
