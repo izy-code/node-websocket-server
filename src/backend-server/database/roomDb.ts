@@ -42,3 +42,18 @@ export const pruneUserFromAnotherRooms = (userSocketId: number, currentRoomId: s
     }
   });
 };
+
+export const replaceRoomFields = (roomId: string, changes: Partial<Room>) => {
+  const updatedRoomIndex = rooms.findIndex((room) => room.roomId === roomId);
+
+  if (updatedRoomIndex === -1) {
+    return;
+  }
+
+  const updatedRoom: Room = {
+    ...rooms[updatedRoomIndex],
+    ...changes,
+  };
+
+  rooms[updatedRoomIndex] = updatedRoom;
+};

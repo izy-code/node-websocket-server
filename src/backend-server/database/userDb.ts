@@ -1,21 +1,35 @@
 import { User } from '../../common/types';
 
-const users: User[] = [];
+const users = new Map<number, User>();
 
-export const createUser = (newUser: User) => users.push(newUser);
+export const createUser = (newUser: User) => users.set(newUser.webSocketId, newUser);
 
-export const getUserBySocketId = (socketId: number) => users.find((user) => user.webSocketId === socketId);
+export const getUserBySocketId = (socketId: number) => users.get(socketId) || null;
 
-export const getUserByName = (name: string) => users.find((user) => user.name === name);
+export const getUserByName = (name: string) => {
+  for (const user of users.values()) {
+    if (user.name === name) {
+      return user;
+    }
+  }
 
-export const replaceUserFields = (socketId: number, newFields: Partial<User>) => {
-  const updatedUserIndex = users.findIndex((user) => user.webSocketId === socketId);
+  return null;
+};
 
-  if (updatedUserIndex === -1) {
+export const replaceUserFields = (prevSocketId: number, newFields: Partial<User>) => {
+  const oldUser = getUserBySocketId(prevSocketId);
+
+  if (!oldUser) {
     return;
   }
 
-  const updatedUser: User = { ...users[updatedUserIndex], ...newFields };
+  const updatedUser: User = { ...oldUser, ...newFields };
 
-  users[updatedUserIndex] = updatedUser;
+  users.set(updatedUser.webSocketId, updatedUser);
+
+  if (updatedUser.webSocketId !== prevSocketId) {
+    users.delete(prevSocketId);
+  }
 };
+
+export const getUsersCount = () => users.size;
