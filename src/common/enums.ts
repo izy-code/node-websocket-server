@@ -11,4 +11,5 @@ export enum MessageType {
   ATTACK_RANDOM = 'randomAttack',
   TURN = 'turn',
   FINISH = 'finish',
+  BOT_PLAY = 'single_play',
 }

@@ -12,4 +12,6 @@ export const pushWinners = (newWinner: Winner) => {
   } else {
     winners.push(newWinner);
   }
+
+  winners.sort((a, b) => b.wins - a.wins);
 };

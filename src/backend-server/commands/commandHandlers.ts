@@ -1,14 +1,16 @@
 import { MessageType } from '../../common/enums';
-import { WebSocketWithId } from '../../common/types';
+import { RandomAttackData, WebSocketWithId } from '../../common/types';
 import {
   validateAddUserToRoomData,
   validateAttackData,
-  validateRandomAttackData,
   validateRegistrationData,
   validateShipsData,
 } from '../../utils/validators';
-import { checkAllPlayersHaveShips } from '../database/gameDb';
-import { isUserInRoom, removeRoomById } from '../database/roomDb';
+import { getBotBoard } from '../bot/boards';
+import { createBot } from '../bot/bot';
+import { checkAllPlayersHaveShips, getGameByPlayerId } from '../database/gameDb';
+import { getRoomByUserSocketId, isUserInRoom, removeRoomById } from '../database/roomDb';
+import { createUser } from '../database/userDb';
 import {
   alternateTurn,
   attack,
@@ -70,7 +72,7 @@ export const handleAttack = (clientWebSocket: WebSocketWithId, parsedData: unkno
 };
 
 export const handleAttackRandom = (clientWebSocket: WebSocketWithId, parsedData: unknown) => {
-  const randomAttackData = validateRandomAttackData(parsedData);
+  const randomAttackData = parsedData as RandomAttackData;
 
   checkPlayerTurn(clientWebSocket.id);
   attack(randomAttackData, clientWebSocket.id);
@@ -80,6 +82,34 @@ export const handleAttackRandom = (clientWebSocket: WebSocketWithId, parsedData:
   if (!isGameEnded) alternateTurn(clientWebSocket.id);
 };
 
+export const handleBotPlay = (clientWebSocket: WebSocketWithId) => {
+  const { botId } = createBot();
+
+  createUser({ name: 'BOT', index: botId, password: '123', isOnline: true, webSocketId: botId });
+  createRoomAndAddUser(clientWebSocket.id);
+
+  const room = getRoomByUserSocketId(clientWebSocket.id);
+
+  if (!room) {
+    throw new Error('Room not found');
+  }
+
+  addUserToRoom(botId, { indexRoom: room.roomId });
+  createGame(clientWebSocket.id);
+  removeRoomById(room.roomId);
+  updateRooms();
+
+  const game = getGameByPlayerId(clientWebSocket.id);
+
+  if (!game) {
+    throw new Error('Game not found');
+  }
+
+  const ships = getBotBoard();
+
+  initPlayerShips({ ships, gameId: game.gameId }, botId);
+};
+
 export const commands = new Map([
   [MessageType.REG, handleRegistration],
   [MessageType.CREATE_ROOM, handleCreateRoom],
@@ -87,4 +117,5 @@ export const commands = new Map([
   [MessageType.ADD_SHIPS, handleAddShips],
   [MessageType.ATTACK, handleAttack],
   [MessageType.ATTACK_RANDOM, handleAttackRandom],
+  [MessageType.BOT_PLAY, handleBotPlay],
 ]);

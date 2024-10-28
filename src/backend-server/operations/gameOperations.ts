@@ -110,7 +110,7 @@ export const checkPlayerTurn = (userSocketId: number) => {
 };
 
 export const attack = (data: AttackData | RandomAttackData, userSocketId: number) => {
-  const indexPlayer = data.indexPlayer;
+  const { indexPlayer = userSocketId } = data;
   const game = getGameByPlayerId(userSocketId);
   const enemyShips = getEnemyShips(userSocketId);
   let { x, y } = data as AttackData;
@@ -152,7 +152,11 @@ export const attack = (data: AttackData | RandomAttackData, userSocketId: number
 };
 
 export const checkGameEnd = (data: AttackData | RandomAttackData, userSocketId: number) => {
-  const { gameId } = data;
+  const gameId = getGameByPlayerId(userSocketId)?.gameId;
+
+  if (!gameId) {
+    return false;
+  }
 
   const winner = getWinnerIfExists(gameId, userSocketId);
 

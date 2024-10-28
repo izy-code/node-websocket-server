@@ -18,7 +18,13 @@ export const backendServer = new WebSocketServer({ port: BACKEND_PORT }, () => {
 });
 
 backendServer.on('connection', (clientWebSocket: WebSocketWithId) => {
-  clientWebSocket.id = ++currentConnectionNumber;
+  const clientId = ++currentConnectionNumber;
+
+  if (clientWebSocket.protocol) {
+    clientWebSocket.id = Number(clientWebSocket.protocol);
+  } else {
+    clientWebSocket.id = clientId;
+  }
 
   console.log(
     `New client with id ${clientWebSocket.id} connected. Number of connected clients: ${backendServer.clients.size}`,
