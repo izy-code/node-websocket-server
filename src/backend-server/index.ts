@@ -74,7 +74,9 @@ export const handleConnectionClosed = (clientWebSocket: WebSocketWithId) => {
   const room = getRoomByUserSocketId(clientWebSocket.id);
 
   if (room) {
-    replaceRoomFields(room.roomId, { roomUsers: room.roomUsers.filter((user) => user.index !== clientWebSocket.id) });
+    replaceRoomFields(room.roomId, {
+      roomUsers: room.roomUsers.filter((user) => user.webSocketId !== clientWebSocket.id),
+    });
 
     if (getRoomById(room.roomId)?.roomUsers.length === 0) {
       removeRoomById(room.roomId);
